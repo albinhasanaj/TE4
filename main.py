@@ -256,6 +256,108 @@ def create_combined_schedule():
 
     return df_schedule
 
+def create_class_schedule_from_combined_schedule(df):
+    schedule = {}
+
+    for day in df.columns:  # Iterate over each day in the DataFrame
+        day_schedule = []  # Initialize the list to hold all classes for the day
+
+        for i, lesson in enumerate(df[day]):  # Iterate over each lesson for the day
+            if pd.notnull(lesson):  # Check if the lesson is not NaN
+                lesson_name = " ".join(lesson.split(" ")[:-1])
+                lesson_time = lesson.split(" ")[-1]
+                kurs_list = []  # To keep track of all classes (kurs) for this lesson
+
+                pupil_lessons_df = pd.read_csv("pupils_lessons.csv", encoding="utf-8")  # Load pupil lessons data
+
+                for index, row in pupil_lessons_df.iterrows():
+                    if lesson_name in row['lektion']:  # Match the lesson name with the data in pupils_lessons.csv
+                        kurs = row['kurs']
+                        if kurs not in kurs_list:  # Only add unique kurs
+                            kurs_list.append(kurs)
+                            # Check if the kurs is already in the day_schedule
+                            kurs_found = False
+                            for class_dict in day_schedule:
+                                if kurs in class_dict:
+                                    class_dict[kurs].append({lesson_time: lesson_name})  # Append new time and lesson
+                                    kurs_found = True
+                                    break
+                            if not kurs_found:  # If kurs was not found, create a new entry
+                                day_schedule.append({kurs: [{lesson_time: lesson_name}]})
+
+        if day_schedule:  # Only add to the schedule if there's something to add
+            schedule[day] = day_schedule
+
+    print(schedule)
+
+    return schedule
+    
+    
+def create_csv_for_each_class(schedule):
+    # Dictionary to hold the data for each class
+    class_data = {}
+
+    # Days of the week to be used as columns in the DataFrame
+    days_of_week = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"]
+
+    # Function to convert time ranges to a tuple of integers representing start and end in minutes
+    def convert_time_range_to_minutes(time_range):
+        # Clean the time range string by removing any extraneous characters like parentheses
+        time_range = time_range.replace("(", "").replace(")", "").strip()
+        start_time, end_time = time_range.split('-')
+        start_hour, start_minute = map(int, start_time.split(':'))
+        end_hour, end_minute = map(int, end_time.split(':'))
+        return (start_hour * 60 + start_minute, end_hour * 60 + end_minute)
+
+    # Iterate through each day and its corresponding lessons in the schedule
+    for day in days_of_week:
+        if day in schedule:  # Only process days that are present in the schedule
+            classes = schedule[day]
+            for class_dict in classes:
+                for kurs, lessons in class_dict.items():
+                    if kurs not in class_data:
+                        # Initialize an empty dictionary for each class to collect lessons per day
+                        class_data[kurs] = {day: [] for day in days_of_week}
+
+                    # Initialize a list to track end times of lessons to check for overlaps
+                    end_times = []
+
+                    # Collect each lesson under the correct day
+                    for lesson in lessons:
+                        for time, subject in lesson.items():
+                            # Convert lesson time to start and end minutes
+                            start_time, end_time = convert_time_range_to_minutes(time)
+
+                            # Check for overlap with any previous lesson's end time
+                            if any(start_time < e for e in end_times):
+                                continue
+
+                            # Append the lesson to the correct day list in the class's dictionary
+                            class_data[kurs][day].append(f"{time}: {subject}")
+
+                            # Update the end times list with the current lesson's end time
+                            end_times.append(end_time)
+
+    # Create DataFrames for each class from the collected data
+    for kurs, data in class_data.items():
+        # Determine the maximum number of lessons any day has to balance rows
+        max_lessons = max(len(lessons) for lessons in data.values())
+
+        # Create a DataFrame with the same number of rows for each day
+        df = pd.DataFrame({day: data[day] + [''] * (max_lessons - len(data[day])) for day in days_of_week})
+
+        # Fill any NaN values with an empty string to avoid writing NaNs in CSV
+        df.fillna('', inplace=True)
+
+        # Ensure the output folder exists
+        output_folder = "class_schedules"
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+
+        # Write DataFrame to CSV file
+        df.to_csv(os.path.join(output_folder, f"{kurs}.csv"), index=False, encoding="utf-8-sig")
+        print(f"Class schedule saved for: {kurs}")
+
 
 if __name__ == "__main__":
     pupils, schema = get_pupils_ssn()
@@ -267,4 +369,5 @@ if __name__ == "__main__":
     lessons = format_days_to_lessons(schema, df)
     convert_time_lessons_to_csv(lessons, "lessons.csv")
     df = create_combined_schedule()
-    print(df)
+    schedule = create_class_schedule_from_combined_schedule(df)
+    create_csv_for_each_class(schedule)
