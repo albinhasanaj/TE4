@@ -1,0 +1,153 @@
+lektion,tid,dag
+Idrott1 EE23,"['10:00', '11:00', '60']",Måndag
+Idrott1 EE24,"['12:00', '13:00', '60']",Måndag
+Sv2 EE23,"['8:10', '09:15', '65']",Måndag
+Datortek1a,"['8:10', '09:35', '85']",Måndag
+Idrott spec 1,"['13:00', '13:50', '50']",Måndag
+Hi1a1,"['12:00', '12:50', '50']",Måndag
+Ma2a,"['14:00', '14:50', '50']",Måndag
+Japanska 1,"['15:00', '16:50', '110']",Måndag
+Nk1a1,"['8:10', '09:10', '60']",Måndag
+Digiskap1,"['9:20', '11:00', '100']",Måndag
+El o mikrodattek,"['11:50', '13:10', '80']",Måndag
+Nï¿½tverksadm,"['13:15', '15:00', '105']",Måndag
+Dator o nï¿½tverkstek,"['8:10', '09:35', '85']",Måndag
+Nï¿½tverkstek EE23,"['12:00', '13:00', '60']",Måndag
+Mekatronik,"['13:15', '14:55', '100']",Måndag
+Idrott spec 1,"['15:00', '16:20', '80']",Måndag
+Ma2a,"['15:00', '16:35', '95']",Måndag
+Nï¿½tverkstechno EE24,"['10:00', '11:00', '60']",Måndag
+Ma1a,"['13:25', '14:55', '90']",Måndag
+Ma2b,"['8:10', '09:10', '60']",Måndag
+Sv3,"['9:20', '11:00', '100']",Måndag
+Konstart sam,"['12:00', '13:30', '90']",Måndag
+Ma2b,"['15:05', '16:25', '80']",Måndag
+Webbutveck 1 ES23/TE23,"['9:45', '11:05', '80']",Måndag
+Ani1,"['12:00', '13:50', '110']",Måndag
+Graf kom1,"['13:55', '14:55', '60']",Måndag
+Samh1b,"['13:25', '14:45', '80']",Måndag
+Prog2,"['11:55', '14:55', '180']",Måndag
+Tek1,"['9:35', '10:55', '80']",Måndag
+Ma1c,"['12:00', '13:20', '80']",Måndag
+Ma2c,"['12:00', '13:20', '80']",Måndag
+Datasam o support,"['12:45', '14:35', '110']",Tisdag
+Datasam o support,"['9:55', '11:45', '110']",Tisdag
+Komnï¿½t,"['8:00', '09:40', '100']",Tisdag
+Idrott1 EE24,"['13:40', '14:40', '60']",Tisdag
+Ma1a,"['12:15', '13:35', '80']",Tisdag
+Eng5 EE24,"['9:55', '11:20', '85']",Tisdag
+Idrott1 ES24/TE24,"['12:00', '13:15', '75']",Tisdag
+Idrott1 ES23/TE23,"['10:00', '11:00', '60']",Tisdag
+Graf kom1,"['13:25', '14:45', '80']",Tisdag
+Nï¿½tverkssï¿½k,"['12:00', '14:50', '170']",Tisdag
+Samh1a1,"['10:05', '11:00', '55']",Tisdag
+Eng7,"['8:10', '09:50', '100']",Tisdag
+Idrott spec 1,"['8:10', '10:00', '110']",Tisdag
+Komnï¿½t,"['8:10', '10:55', '165']",Tisdag
+Eng6 EE23,"['12:00', '13:15', '75']",Tisdag
+Sv2 EE23,"['13:20', '14:55', '95']",Tisdag
+Japanska 1,"['15:00', '17:00', '120']",Tisdag
+Datortek1a,"['8:10', '09:35', '85']",Tisdag
+Idrott spec 2,"['8:10', '10:00', '110']",Tisdag
+Medieprod2,"['10:05', '11:25', '80']",Tisdag
+Ani2,"['12:00', '13:20', '80']",Tisdag
+Tillprog ES22/TE22,"['13:40', '15:00', '80']",Tisdag
+Medier komsam,"['11:55', '13:15', '80']",Tisdag
+Graf kom1,"['8:10', '09:30', '80']",Tisdag
+Samh1b,"['8:10', '09:30', '80']",Tisdag
+Medieprod1,"['9:40', '11:00', '80']",Tisdag
+Ma1b,"['13:40', '15:00', '80']",Tisdag
+Webbutveck 2,"['9:55', '11:15', '80']",Tisdag
+Prog2,"['12:05', '13:35', '90']",Tisdag
+Ma2c,"['9:35', '10:55', '80']",Tisdag
+Ma1c,"['9:35', '10:55', '80']",Tisdag
+Datasam o support,"['12:45', '14:35', '110']",Onsdag
+Adm servar o nï¿½tverk,"['10:05', '11:55', '110']",Onsdag
+Dator o nï¿½tverkstek,"['8:10', '09:55', '105']",Onsdag
+Tek1,"['8:10', '09:30', '80']",Onsdag
+Nï¿½tverkstek EE22,"['12:00', '16:20', '260']",Onsdag
+Sv3,"['8:10', '09:40', '90']",Onsdag
+El o mikrodattek,"['9:50', '11:10', '80']",Onsdag
+Digiskap1,"['8:10', '09:40', '90']",Onsdag
+Nï¿½tverkssï¿½k,"['16:25', '16:55', '30']",Onsdag
+Dator o nï¿½tverkstek,"['8:10', '09:30', '80']",Onsdag
+Eng6 EE23,"['9:40', '11:00', '80']",Onsdag
+Webbservprog 1 EE23/TE22,"['12:00', '14:40', '160']",Onsdag
+Ma2a,"['14:50', '16:30', '100']",Onsdag
+Energitek1,"['8:10', '09:35', '85']",Onsdag
+Elektromekanik,"['9:40', '11:05', '85']",Onsdag
+Sv1 EE24,"['12:00', '13:25', '85']",Onsdag
+Prog1 EE24/TE23,"['14:50', '16:15', '85']",Onsdag
+Tillprog ES22/TE22,"['9:45', '11:05', '80']",Onsdag
+Kultur hi2b,"['12:00', '13:20', '80']",Onsdag
+Idrott spec 1,"['14:50', '16:40', '110']",Onsdag
+Konstart sam,"['13:30', '15:00', '90']",Onsdag
+Medieprod2,"['15:10', '16:30', '80']",Onsdag
+Hi1b,"['8:10', '09:30', '80']",Onsdag
+Re1 ES23/TE23,"['10:00', '11:00', '60']",Onsdag
+Medier komsam,"['12:00', '13:20', '80']",Onsdag
+Eng6 ES23/TE23,"['13:25', '14:45', '80']",Onsdag
+Eng5 ES24/TE24,"['12:00', '13:20', '80']",Onsdag
+Sv1 ES24/TE24,"['9:45', '11:05', '80']",Onsdag
+Medieprod1,"['13:30', '14:50', '80']",Onsdag
+Ma3c,"['12:00', '13:20', '80']",Onsdag
+Ma2c,"['13:25', '14:45', '80']",Onsdag
+Ma1c,"['13:25', '14:45', '80']",Onsdag
+Ke1,"['14:55', '16:15', '80']",Onsdag
+Komnï¿½t,"['8:00', '09:40', '100']",Torsdag
+Adm servar o nï¿½tverk,"['9:50', '11:45', '115']",Torsdag
+Re1 ES23/TE23,"['8:10', '09:30', '80']",Torsdag
+Gymarb EE22,"['11:50', '15:15', '205']",Torsdag
+Tillprog EE22,"['8:10', '09:40', '90']",Torsdag
+Samh1a1,"['9:50', '11:00', '70']",Torsdag
+Idrott spec 1,"['15:20', '17:00', '100']",Torsdag
+Eng7,"['15:25', '17:00', '95']",Torsdag
+Datasam o support,"['15:05', '17:00', '115']",Torsdag
+Webbservprog 1 EE23/TE22,"['13:40', '14:50', '70']",Torsdag
+Eng6 EE23,"['12:10', '13:30', '80']",Torsdag
+Mekatronik,"['9:05', '11:15', '130']",Torsdag
+Hi1a1,"['8:10', '09:00', '50']",Torsdag
+Elektromekanik,"['8:10', '09:35', '85']",Torsdag
+Energitek1,"['9:40', '11:05', '85']",Torsdag
+Prog1 EE24/TE23,"['12:00', '13:25', '85']",Torsdag
+Nï¿½tverkstechno EE24,"['13:35', '15:30', '115']",Torsdag
+Gymarb ES22,"['8:10', '09:30', '80']",Torsdag
+Idrott spec 2,"['15:20', '17:00', '100']",Torsdag
+Ani2,"['9:40', '11:00', '80']",Torsdag
+Ma2b,"['12:00', '13:20', '80']",Torsdag
+Nk1b,"['13:40', '15:00', '80']",Torsdag
+Webbutveck 1 ES23/TE23,"['9:45', '11:05', '80']",Torsdag
+Eng6 ES23/TE23,"['13:35', '14:55', '80']",Torsdag
+Digiskap2,"['15:10', '16:30', '80']",Torsdag
+Eng5 ES24/TE24,"['9:45', '11:05', '80']",Torsdag
+Ma1b,"['13:30', '14:50', '80']",Torsdag
+Gymarb TE22,"['12:00', '13:20', '80']",Torsdag
+Ma4,"['9:40', '11:00', '80']",Torsdag
+Ma2c,"['8:10', '09:30', '80']",Torsdag
+Ma1c,"['8:10', '09:30', '80']",Torsdag
+Ke1,"['12:00', '13:20', '80']",Torsdag
+Dator o nï¿½tverkstek,"['8:10', '09:55', '105']",Fredag
+Adm servar o nï¿½tverk,"['10:00', '11:50', '110']",Fredag
+Nï¿½tverkstechno EE22,"['12:00', '13:45', '105']",Fredag
+Nï¿½tverkssï¿½k,"['13:50', '14:50', '60']",Fredag
+Tillprog EE22,"['15:00', '17:00', '120']",Fredag
+Nk1a1,"['9:55', '11:00', '65']",Fredag
+Nï¿½tverkstek EE23,"['8:10', '11:00', '170']",Fredag
+Sv2 EE23,"['12:00', '14:05', '125']",Fredag
+Hi1a1,"['14:15', '15:00', '45']",Fredag
+Adm servar o nï¿½tverk,"['15:05', '17:00', '115']",Fredag
+Sv1 EE24,"['9:45', '11:10', '85']",Fredag
+Eng5 EE24,"['12:10', '13:35', '85']",Fredag
+Ma1a,"['13:40', '15:10', '90']",Fredag
+Gymarb ES22,"['8:10', '09:30', '80']",Fredag
+Re1 EE22/TE22,"['8:10', '09:50', '100']",Fredag
+Kultur hi2b,"['9:40', '11:00', '80']",Fredag
+Nk1b,"['12:00', '13:20', '80']",Fredag
+Hi1b,"['8:10', '09:30', '80']",Fredag
+Ani1,"['9:40', '11:00', '80']",Fredag
+Digiskap2,"['14:15', '15:35', '80']",Fredag
+Sv1 ES24/TE24,"['8:10', '09:30', '80']",Fredag
+Webbutveck 2,"['10:00', '11:20', '80']",Fredag
+Gymarb TE22,"['12:00', '13:20', '80']",Fredag
+Ma3c,"['10:00', '11:20', '80']",Fredag
+Tek1,"['12:10', '13:30', '80']",Fredag
