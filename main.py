@@ -88,6 +88,32 @@ def convert_to_csv(data, filename="pupils_lessons.csv"):
     return df
     
 
+def add_minutes_to_time(old_time, minutes_to_add):
+    """
+    Adds a specified number of minutes to a given time in HH:MM format.
+
+    Args:
+        old_time (str): The original time in "HH:MM" format.
+        minutes_to_add (int): The number of minutes to add to the original time.
+
+    Returns:
+        str: The new time in "HH:MM" format.
+    """
+    if ":" in old_time:
+        old_time_split = old_time.split(":")
+        old_time_minutes = int(old_time_split[1])
+        old_time_hours = int(old_time_split[0])
+        new_time_minutes = old_time_minutes + int(minutes_to_add)
+
+        # Adjust hours and minutes correctly
+        new_time_hours = old_time_hours + new_time_minutes // 60
+        new_time_minutes = new_time_minutes % 60
+
+        # Format the new time correctly
+        return f"{new_time_hours:02}:{new_time_minutes:02}"
+    return old_time  # Return the original time if no ":" found
+    
+    
 def format_days_to_lessons(data, df):
     days = ["ndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"]
     lessons = [
@@ -112,10 +138,12 @@ def format_days_to_lessons(data, df):
         step = 0
         for day in days:
             if day in line:
+                #find the lektion
                 for lektion in df["lektion"]:
                     if lektion in line:
                         line_data = line.split("\t")
 
+                        #p2 are lesssons that doesnt make any sense so gone they
                         p2 = False
 
                         for x in line_data:
@@ -134,37 +162,17 @@ def format_days_to_lessons(data, df):
                                     for lesson in lessons:
                                         for key, value in lesson.items():
                                             if key == day:
+                                                    if ":" in old_time:
+                                                        new_time = add_minutes_to_time(old_time, x)
+                                                        value[-1][lektion].append(new_time)
+                                                    value[-1][lektion].append(x)
+                                                    continue
+                                            if key == "Måndag" and day == "ndag":
                                                 if ":" in old_time:
-                                                    old_time_split = old_time.split(":")
-                                                    old_time_minutes = int(old_time_split[1])
-                                                    old_time_hours = int(old_time_split[0])
-                                                    new_time_minutes = old_time_minutes + int(x)
-
-                                                    # Adjust hours and minutes correctly
-                                                    new_time_hours = old_time_hours + new_time_minutes // 60
-                                                    new_time_minutes = new_time_minutes % 60
-
-                                                    # Format the new time correctly
-                                                    new_time = f"{new_time_hours:02}:{new_time_minutes:02}"
+                                                    new_time = add_minutes_to_time(old_time, x)
                                                     value[-1][lektion].append(new_time)
                                                 value[-1][lektion].append(x)
                                                 continue
-                                            if key == "Måndag" and day == "ndag":
-                                                if ":" in old_time:
-                                                    old_time_split = old_time.split(":")
-                                                    old_time_minutes = int(old_time_split[1])
-                                                    old_time_hours = int(old_time_split[0])
-                                                    new_time_minutes = old_time_minutes + int(x)
-
-                                                    # Adjust hours and minutes correctly
-                                                    new_time_hours = old_time_hours + new_time_minutes // 60
-                                                    new_time_minutes = new_time_minutes % 60
-
-                                                    # Format the new time correctly
-                                                    new_time = f"{new_time_hours:02}:{new_time_minutes:02}"
-                                                    value[-1][lektion].append(new_time)
-
-                                                value[-1][lektion].append(x)
 
                                 if ":" in x:
                                     step = True
@@ -189,11 +197,26 @@ def format_days_to_lessons(data, df):
     return lessons
         
 def convert_time_lessons_to_csv(data, output_filename):
+    '''
+    Function to convert the time lessons data to a CSV file
+    It works by flattening (converting to a list of dictionaries) the data structure
+    and then converting it to a DataFrame using pandas, which is then saved to a CSV file
+    :param data: The time lessons data to convert
+    :param output_filename: The name of the output CSV file
+    '''
+    
+    
     flattened_data = []
+    
+    # Flatten the data structure to a list of dictionaries
     for day in data:
+        # Iterate over each day in the data
         for key, value in day.items():
+            # Iterate over each lesson in the day
             for lesson in value:
+                # Iterate over each lesson's name and time
                 for lesson_name, time in lesson.items():
+                    # Append the lesson data to the flattened list
                     flattened_data.append({
                         'lektion': lesson_name,
                         'tid': time,
@@ -206,6 +229,11 @@ def convert_time_lessons_to_csv(data, output_filename):
     return df
 
 def create_combined_schedule():
+    '''
+    This function reads the lessons.csv file and combines the lessons for each day into a single schedule
+    It then saves the combined schedule to a new CSV file in the "combined_schedule" folder
+    :return: The combined schedule as a DataFrame
+    '''
     # Define the days of the week
     days = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"]
     
@@ -257,6 +285,12 @@ def create_combined_schedule():
     return df_schedule
 
 def create_class_schedule_from_combined_schedule(df):
+    '''
+    This function takes the combined schedule DataFrame and creates a schedule for each class
+    It then saves the class schedules to separate CSV files in the "class_schedules" folder
+    :param df: The combined schedule DataFrame
+    :return: The class schedule dictionary
+    '''
     schedule = {}
 
     for day in df.columns:  # Iterate over each day in the DataFrame
@@ -294,6 +328,16 @@ def create_class_schedule_from_combined_schedule(df):
     
     
 def create_csv_for_each_class(schedule):
+    '''
+    This function takes the class schedule dictionary and creates a separate CSV file for each class
+    It saves the CSV files in the "class_schedules" folder
+    params: schedule: The class schedule dictionary
+    returns: None
+    Note:
+    - The current implementation does not handle overlapping lessons correctly
+    - If a wrongly assigned lesson is present before the correct overlapping one, the output will be incorrect
+    '''
+    
     # Dictionary to hold the data for each class
     class_data = {}
 
