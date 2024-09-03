@@ -3,16 +3,23 @@ import os
 import ast
 from datetime import datetime
 
-# MAKE THIS DYNAMIC BY TAKING THE DATE - 3 AND -2 AND -1 KIND OF U GET IT
-CLASSES = ["TE22", "TE23", "TE24", "EE22", "EE23", "EE24", "ES22", "ES23", "ES24", "TE4"]
+def get_classes(classes = ["TE", "EE", "ES"]):
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    if current_month < 8: # new school year starts in august
+        current_year -= 1
+        
+    current_year = str(current_year)[2:]
+    classes = [f"{cls}{year}" for cls in classes for year in range(int(current_year) - 2, int(current_year) + 1)]	
+    return classes
 
-def get_pupils_ssn():
+def get_pupils_ssn(classes):
     pupils = []
     schema_lines = []
     with open("./schema.txt", "r") as file:
         for line in file:
             schema_lines.append(line.strip())
-            for cls in CLASSES:
+            for cls in classes:
                 if line.startswith(cls):
                     ssns = line.split(",")[1:]
                     pupils.extend([{cls: ssn} for ssn in ssns])
@@ -24,6 +31,7 @@ def get_all_lessons(data, schema):
     schema_dict = {line.split("\t")[0]: line for line in schema}
     for pupil in data:
         for cls, ssn in pupil.items():
+            # Get all lessons for the pupil by checking if the SSN is in the schema line and not equal to the class name (SSN != class name)
             pupil_lessons = [{ssn: schema_dict.get(lesson_id).split("\t")[0]} for lesson_id in schema_dict if ssn in schema_dict[lesson_id] and ssn != lesson_id]
             lessons.append({cls: pupil_lessons})
     return lessons
@@ -253,7 +261,7 @@ def create_class_schedule_from_combined_schedule(df):
     return schedule
     
     
-def create_csv_for_each_class(schedule):
+def create_csv_for_each_class(schedule, classes):
     class_data = {}
     days_of_week = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"]
 
@@ -276,9 +284,8 @@ def create_csv_for_each_class(schedule):
                     for time, subject in lesson.items():
                         start_time, end_time = convert_time_range_to_minutes(time)
                         # Check for overlapping times
-                        if not any(start_time < e and start_time >= s for s, e in end_times):
-                            class_data[kurs][day].append(f"{time}: {subject}")
-                            end_times.append((start_time, end_time))  # Keep track of (start, end) times
+                        class_data[kurs][day].append(f"{time}: {subject}")
+                        end_times.append((start_time, end_time))  # Keep track of (start, end) times
 
     for kurs, data in class_data.items():
         max_lessons = max(len(lessons) for lessons in data.values())
@@ -298,7 +305,9 @@ def create_csv_for_each_class(schedule):
         print(f"Class schedule saved for: {kurs}")
 
 if __name__ == "__main__":
-    pupils, schema = get_pupils_ssn()
+    
+    classes = get_classes()
+    pupils, schema = get_pupils_ssn(classes)
 
     all_lessons = get_all_lessons(pupils, schema)
     names = get_pupil_names(pupils, schema)
@@ -308,4 +317,4 @@ if __name__ == "__main__":
     convert_time_lessons_to_csv(lessons, "lessons.csv")
     df = create_combined_schedule()
     schedule = create_class_schedule_from_combined_schedule(df)
-    create_csv_for_each_class(schedule)
+    create_csv_for_each_class(schedule, classes)
