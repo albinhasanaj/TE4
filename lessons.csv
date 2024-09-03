@@ -3,7 +3,7 @@ Idrott1 EE23,"['10:00', '11:00', '60']",Måndag
 Idrott1 EE24,"['12:00', '13:00', '60']",Måndag
 Sv2 EE23,"['8:10', '09:15', '65']",Måndag
 Datortek1a,"['8:10', '09:35', '85']",Måndag
-Idrott spec 1,"['13:00', '13:50', '50']",Måndag
+Idrott spec 1B,"['13:00', '13:50', '50']",Måndag
 Hi1a1,"['12:00', '12:50', '50']",Måndag
 Ma2a,"['14:00', '14:50', '50']",Måndag
 Japanska 1,"['15:00', '16:50', '110']",Måndag
@@ -14,7 +14,7 @@ Nï¿½tverksadm,"['13:15', '15:00', '105']",Måndag
 Dator o nï¿½tverkstek,"['8:10', '09:35', '85']",Måndag
 Nï¿½tverkstek EE23,"['12:00', '13:00', '60']",Måndag
 Mekatronik,"['13:15', '14:55', '100']",Måndag
-Idrott spec 1,"['15:00', '16:20', '80']",Måndag
+Idrott spec 1B,"['15:00', '16:20', '80']",Måndag
 Ma2a,"['15:00', '16:35', '95']",Måndag
 Nï¿½tverkstechno EE24,"['10:00', '11:00', '60']",Måndag
 Ma1a,"['13:25', '14:55', '90']",Måndag
@@ -80,7 +80,7 @@ Sv1 EE24,"['12:00', '13:25', '85']",Onsdag
 Prog1 EE24/TE23,"['14:50', '16:15', '85']",Onsdag
 Tillprog ES22/TE22,"['9:45', '11:05', '80']",Onsdag
 Kultur hi2b,"['12:00', '13:20', '80']",Onsdag
-Idrott spec 1,"['14:50', '16:40', '110']",Onsdag
+Idrott spec 1B,"['14:50', '16:40', '110']",Onsdag
 Konstart sam,"['13:30', '15:00', '90']",Onsdag
 Medieprod2,"['15:10', '16:30', '80']",Onsdag
 Hi1b,"['8:10', '09:30', '80']",Onsdag

@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import ast
 from datetime import datetime
+import re
 
 class Schedule:
     def __init__(self, data, classes):
@@ -106,7 +107,7 @@ class Schedule:
             for day in days:
                 if day in line:
                     for lektion in self.df["lektion"]:
-                        if lektion in line:
+                        if re.search(rf"\b{lektion}\b", line):
                             line_data = line.split("\t")
                             p2 = False
                             for x in line_data:
