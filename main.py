@@ -67,6 +67,7 @@ class Schedule:
             }
             for lesson_dict in self.all_lessons for cls, pupil_lessons in lesson_dict.items()
             for lesson in pupil_lessons for ssn, lesson_name in lesson.items() if cls != lesson_name
+            
         ]
         df = pd.DataFrame(flattened_data)
         df.to_csv(filename, index=False)
@@ -198,7 +199,7 @@ class Schedule:
             for lesson in df[day].dropna():
                 lesson_name, lesson_time = lesson.rsplit(' ', 1)
                 lesson_time = lesson_time.strip('()')
-                kurs_list = pupil_lessons_df[pupil_lessons_df['lektion'].str.contains(lesson_name)]['kurs'].unique()
+                kurs_list = pupil_lessons_df[pupil_lessons_df['lektion'] == re.sub(r'\s+\(.*\)', '', lesson_name)]['kurs'].unique()
                 for kurs in kurs_list:
                     class_dict = next((item for item in day_schedule if kurs in item), {kurs: []})
                     class_dict[kurs].append({lesson_time: lesson_name})
