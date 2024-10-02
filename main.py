@@ -17,27 +17,44 @@ class Schedule:
         current_year = str(current_year)[2:]
         classes = [f"{cls}{year}" for cls in self.classes for year in range(int(current_year) - 2, int(current_year) + 1)]
         
+        print(classes)
         return classes
     
     def get_pupils_ssn(self):
         pupils = []
         schema_lines = []
-        with open(self.text_file, "r") as file:
+        
+        # Regular expression to match 12-digit SSNs
+        ssn_pattern = re.compile(r"\b\d{12}\b")
+        
+        with open(self.text_file, "r", encoding="utf-8") as file:
             for line in file:
                 schema_lines.append(line.strip())
                 for cls in self.classes:
                     if line.startswith(cls):
-                        ssns = line.split(",")[1:]
+                        ssns = ssn_pattern.findall(line)
                         pupils.extend([{cls: ssn} for ssn in ssns])
+                        
         return pupils, schema_lines
     
     def get_all_lessons(self):
         lessons = []
-        schema_dict = {line.split("\t")[0]: line for line in self.schema}
+        def is_ssn(s):
+            s = s.strip()
+            return s.isdigit() and len(s) == 12
+        # Exclude SSNs from schema_dict and strip whitespace
+        schema_dict = {line.split("\t")[0].strip(): line.strip() for line in self.schema if not is_ssn(line.split("\t")[0])}
         for pupil in self.data:
             for cls, ssn in pupil.items():
-                pupil_lessons = [{ssn: schema_dict.get(lesson_id).split("\t")[0]} for lesson_id in schema_dict if ssn in schema_dict[lesson_id] and ssn != lesson_id]
+                ssn = ssn.strip()  # Strip whitespace from SSN
+                pupil_lessons = []
+                for lesson_id in schema_dict:
+                    lesson_line = schema_dict[lesson_id]
+                    if ssn in lesson_line:
+                        lesson_name = lesson_line.split("\t")[0].strip()
+                        pupil_lessons.append({ssn: lesson_name})
                 lessons.append({cls: pupil_lessons})
+                
         return lessons
     
     def get_pupil_names(self):
@@ -47,11 +64,12 @@ class Schedule:
             if "Student" in line:
                 track_row = i
                 break
-        schema_dict = {line.split("\t")[0]: line for line in self.schema[track_row:]}
+        schema_dict = {line.split("\t")[0].strip(): line.strip() for line in self.schema[track_row-1:]}
         for pupil in self.data:
             for cls, ssn in pupil.items():
+                ssn = ssn.strip()
                 if ssn in schema_dict:
-                    x = [x for x in schema_dict[ssn].split("\t") if x and "{" not in x]
+                    x = [item.strip() for item in schema_dict[ssn].split("\t") if item and "{" not in item]
                     if len(x) > 2:
                         name = f"{x[1]} {x[2]}"
                         names.append({ssn: name})
@@ -82,7 +100,7 @@ class Schedule:
         new_time_minutes = new_time_minutes % 60
         return f"{new_time_hours:02}:{new_time_minutes:02}"
     
-    def format_days_to_lessons(self):
+    def format_days_to_lessons(self, current_period):
         days = ["ndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"]
         lessons = [
             {
@@ -110,12 +128,15 @@ class Schedule:
                     for lektion in self.df["lektion"]:
                         if re.search(rf"\b{lektion}\b", line):
                             line_data = line.split("\t")
-                            p2 = False
-                            for x in line_data:
-                                if x == "P2":
-                                    p2 = True
-                                    break
-                            if not p2:
+                            #check if period exists, or if there are not "P1" "P2" AND "P3" in the line
+                            if current_period in line_data or ("P1" not in line_data and "P2" not in line_data and "P3" not in line_data):
+                                
+                                # if "Japanska" in line:
+                                #     print(line)
+                                    
+                                # if "Idrott" in line:
+                                #     print(line)
+
                                 step = False
                                 old_time = ""
                                 for x in line_data:
@@ -246,7 +267,7 @@ class Schedule:
         self.all_lessons = self.get_all_lessons()
         self.names = self.get_pupil_names()
         self.df = self.convert_to_csv("pupils_lessons.csv")
-        self.lessons = self.format_days_to_lessons()
+        self.lessons = self.format_days_to_lessons("P1")
         self.convert_time_lessons_to_csv("lessons.csv")
         self.df = self.create_combined_schedule()
         self.schedule = self.create_class_schedule_from_combined_schedule(self.df)
