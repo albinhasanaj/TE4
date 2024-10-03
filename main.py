@@ -3,6 +3,8 @@ import os
 import ast
 from datetime import datetime
 import re
+import threading
+import multiprocessing
 
 class Schedule:
     def __init__(self, data, classes):
@@ -337,18 +339,44 @@ class Schedule:
                 encoding="utf-8-sig"
             )
             print(f"Class schedule saved for: {kurs}")
+        
+        
+    def run_schedule_operations(self):
+        # Step 1: Run get_classes and get_pupils_ssn without multiprocessing since they are prerequisites
+        self.classes = self.get_classes()
+        self.data, self.schema = self.get_pupils_ssn()
 
+        # Step 2: Use multiprocessing for CPU-bound tasks
+        with multiprocessing.Pool() as pool:
+            # Collect results from the multiprocessing tasks
+            results = pool.starmap(self._get_attr_result, [
+                ('get_all_lessons',),
+                ('get_pupil_names',),
+            ])
 
+        # Assign the results to the corresponding attributes
+        self.all_lessons = results[0]  # Result from get_all_lessons
+        self.names = results[1]        # Result from get_pupil_names
 
+        # Step 3: Continue with dependent operations after multiprocessing tasks finish
+        self.df = self.convert_to_csv("pupils_lessons.csv")
+        self.lessons = self.format_days_to_lessons("P1")
+        self.convert_time_lessons_to_csv("lessons.csv")
+        self.df = self.create_combined_schedule()
+        self.schedule = self.create_class_schedule_from_combined_schedule(self.df)
+        self.create_csv_for_each_class(self.schedule)
+
+    def _get_attr_result(self, func_name):
+        """Helper function to run a method and return its result using multiprocessing."""
+        func = getattr(self, func_name)
+        return func()
+
+# In the main block
 if __name__ == "__main__":
+    start_time = datetime.now()
+
     schedule = Schedule("schema.txt", ["TE", "EE", "ES"])
-    schedule.classes = schedule.get_classes()
-    schedule.data, schedule.schema = schedule.get_pupils_ssn()
-    schedule.all_lessons = schedule.get_all_lessons()
-    schedule.names = schedule.get_pupil_names()
-    schedule.df = schedule.convert_to_csv("pupils_lessons.csv")
-    schedule.lessons = schedule.format_days_to_lessons("P1")
-    schedule.convert_time_lessons_to_csv("lessons.csv")
-    schedule.df = schedule.create_combined_schedule()
-    schedule.schedule = schedule.create_class_schedule_from_combined_schedule(schedule.df)
-    schedule.create_csv_for_each_class(schedule.schedule)
+    schedule.run_schedule_operations()
+
+    end_time = datetime.now()
+    print(f"Time taken with multiprocessing: {end_time - start_time}")
