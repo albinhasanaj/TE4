@@ -41,7 +41,6 @@ class Schedule:
 
         return pupils, schema_lines
 
-    
     def get_all_lessons(self):
         lessons = []
         
@@ -62,7 +61,6 @@ class Schedule:
 
         return lessons
 
-    
     def get_pupil_names(self):
         names = []
         track_row = 0
@@ -271,8 +269,6 @@ class Schedule:
                 schedule[day] = day_schedule
         return schedule
 
-
-    
     def create_csv_for_each_class(self, schedule):
         class_data = {}
         days_of_week = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"]
@@ -331,7 +327,6 @@ class Schedule:
             )
             print(f"Class schedule saved for: {kurs}")
         
-        
     def run_schedule_operations(self):
         # Step 1: Run get_classes and get_pupils_ssn without multiprocessing since they are prerequisites
         self.classes = self.get_classes()
@@ -364,7 +359,7 @@ class Schedule:
 
 # In the main block
 
-PERIOD = "P1"
+PERIOD = "P2"
 
 if __name__ == "__main__":
     start_time = datetime.now()
