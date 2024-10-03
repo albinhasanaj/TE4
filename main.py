@@ -292,6 +292,8 @@ class Schedule:
                             start_time = lesson['start_time']
                             end_time = lesson['end_time']
                             lesson_name = lesson['lesson_name']
+                            lesson_name = lesson_name.replace("�", "ä")
+                            
                             room = lesson.get('room', None)
                             time_range = f"{start_time}-{end_time}"
                             # Format the lesson string including room if available
@@ -349,7 +351,7 @@ class Schedule:
 
         # Step 3: Continue with dependent operations after multiprocessing tasks finish
         self.df = self.convert_to_csv("pupils_lessons.csv")
-        self.lessons = self.format_days_to_lessons("P1")
+        self.lessons = self.format_days_to_lessons(PERIOD)
         self.convert_time_lessons_to_csv("lessons.csv")
         self.df = self.create_combined_schedule()
         self.schedule = self.create_class_schedule_from_combined_schedule(self.df)
@@ -361,6 +363,9 @@ class Schedule:
         return func()
 
 # In the main block
+
+PERIOD = "P1"
+
 if __name__ == "__main__":
     start_time = datetime.now()
 
