@@ -25,39 +25,43 @@ class Schedule:
     def get_pupils_ssn(self):
         pupils = []
         schema_lines = []
-        
+
         # Regular expression to match 12-digit SSNs
         ssn_pattern = re.compile(r"\b\d{12}\b")
         
+        # Combine class check into one expression to reduce repetitive checks
+        class_pattern = re.compile(r"^(?:" + "|".join(self.classes) + r")")
+
         with open(self.text_file, "r", encoding="utf-8") as file:
             for line in file:
                 schema_lines.append(line.strip())
-                for cls in self.classes:
-                    if line.startswith(cls):
-                        ssns = ssn_pattern.findall(line)
-                        pupils.extend([{cls: ssn} for ssn in ssns])
-                        
+                if class_pattern.match(line):
+                    ssns = ssn_pattern.findall(line)
+                    pupils.extend([{cls: ssn} for ssn in ssns for cls in self.classes if line.startswith(cls)])
+
         return pupils, schema_lines
+
     
     def get_all_lessons(self):
         lessons = []
-        def is_ssn(s):
-            s = s.strip()
-            return s.isdigit() and len(s) == 12
-        # Exclude SSNs from schema_dict and strip whitespace
-        schema_dict = {line.split("\t")[0].strip(): line.strip() for line in self.schema if not is_ssn(line.split("\t")[0])}
+        
+        # Create a dictionary that excludes SSNs and strips whitespace
+        schema_dict = {
+            line.split("\t")[0].strip(): line.strip() for line in self.schema if not line.split("\t")[0].strip().isdigit()
+        }
+
+        # Process each pupil and their lessons
         for pupil in self.data:
             for cls, ssn in pupil.items():
-                ssn = ssn.strip()  # Strip whitespace from SSN
-                pupil_lessons = []
-                for lesson_id in schema_dict:
-                    lesson_line = schema_dict[lesson_id]
-                    if ssn in lesson_line:
-                        lesson_name = lesson_line.split("\t")[0].strip()
-                        pupil_lessons.append({ssn: lesson_name})
+                ssn = ssn.strip()  # Ensure SSN is clean
+                pupil_lessons = [
+                    {ssn: schema_dict[lesson_id].split("\t")[0].strip()}
+                    for lesson_id, lesson_line in schema_dict.items() if ssn in lesson_line
+                ]
                 lessons.append({cls: pupil_lessons})
-                
+
         return lessons
+
     
     def get_pupil_names(self):
         names = []
@@ -178,30 +182,15 @@ class Schedule:
         # print(lessons)
         return lessons
     
-    def convert_time_lessons_to_csv(self, output_filename):
-        # flattened_data = [
-        #     {'lektion': lesson_name, 'tid': time, 'dag': day, 'rum': room}
-        #     for day_data in self.lessons for day, lessons in day_data.items()
-        #     for lesson in lessons for lesson_name, time in lesson.items()
-        #     for room in time[1:]      
-        # ]
-        
-        flattened_data = []
-        for day_data in self.lessons:
-            for day, lessons in day_data.items():
-                for lesson in lessons:
-                    for lesson_name, time_and_room in lesson.items():
-                        start_time = time_and_room[0]
-                        end_time = time_and_room[1]
-                        total_minutes = time_and_room[2]
-                        room = time_and_room[3]
-                        
-                        flattened_data.append({
-                            'lektion': lesson_name,
-                            'tid': [start_time, end_time, total_minutes],
-                            'dag': day,
-                            'rum': room
-                        })
+    def convert_time_lessons_to_csv(self, output_filename):        
+        flattened_data = [
+            {"lektion": lesson_name, "tid": [start_time, end_time, total_minutes], "dag": day, "rum": room}
+            for day_data in self.lessons
+            for day, lessons in day_data.items()
+            for lesson in lessons
+            for lesson_name, time_and_room in lesson.items()
+            for start_time, end_time, total_minutes, room in [time_and_room]
+        ]
         df = pd.DataFrame(flattened_data)
         df.to_csv(output_filename, index=False)
         return df
