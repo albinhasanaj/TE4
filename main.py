@@ -84,8 +84,7 @@ class Schedule:
                 'namn': next((name[ssn] for name in self.names if ssn in name), '')
             }
             for lesson_dict in self.all_lessons for cls, pupil_lessons in lesson_dict.items()
-            for lesson in pupil_lessons for ssn, lesson_name in lesson.items() if cls != lesson_name
-            
+            for lesson in pupil_lessons for ssn, lesson_name in lesson.items() if cls != lesson_name   
         ]
         df = pd.DataFrame(flattened_data)
         df.to_csv(filename, index=False)
@@ -130,16 +129,9 @@ class Schedule:
                             line_data = line.split("\t")
                             #check if period exists, or if there are not "P1" "P2" AND "P3" in the line
                             if current_period in line_data or ("P1" not in line_data and "P2" not in line_data and "P3" not in line_data):
-                                
-                                # if "Japanska" in line:
-                                #     print(line)
-                                    
-                                # if "Idrott" in line:
-                                #     print(line)
-
                                 step = False
                                 old_time = ""
-                                for x in line_data:
+                                for i, x in enumerate(line_data):
                                     if step:
                                         step = False
                                         for lesson in lessons:
@@ -149,12 +141,20 @@ class Schedule:
                                                         new_time = self.add_minutes_to_time(old_time, x)
                                                         value[-1][lektion].append(new_time)
                                                     value[-1][lektion].append(x)
+                                                    
+                                                    room = line_data[i+5]
+                                                    value[-1][lektion].append(room)
+                                                    
                                                     continue
                                                 if key == "Måndag" and day == "ndag":
                                                     if ":" in old_time:
                                                         new_time = self.add_minutes_to_time(old_time, x)
                                                         value[-1][lektion].append(new_time)
                                                     value[-1][lektion].append(x)
+                                                    
+                                                    room = line_data[i+5]
+                                                    value[-1][lektion].append(room)
+                                                    
                                                     continue
                                     if ":" in x:
                                         step = True
@@ -163,21 +163,43 @@ class Schedule:
                                                 if key == day:
                                                     value.append({lektion: [x]})
                                                     old_time = x
+                                                    
                                                     continue
                                                 if key == "Måndag" and day == "ndag":
                                                     value.append({lektion: [x]})
                                                     old_time = x
+                                                    
                             break
             if day_lessons == []:
                 continue
+            
+        # print(lessons)
         return lessons
     
     def convert_time_lessons_to_csv(self, output_filename):
-        flattened_data = [
-            {'lektion': lesson_name, 'tid': time, 'dag': day}
-            for day_data in self.lessons for day, lessons in day_data.items()
-            for lesson in lessons for lesson_name, time in lesson.items()
-        ]
+        # flattened_data = [
+        #     {'lektion': lesson_name, 'tid': time, 'dag': day, 'rum': room}
+        #     for day_data in self.lessons for day, lessons in day_data.items()
+        #     for lesson in lessons for lesson_name, time in lesson.items()
+        #     for room in time[1:]      
+        # ]
+        
+        flattened_data = []
+        for day_data in self.lessons:
+            for day, lessons in day_data.items():
+                for lesson in lessons:
+                    for lesson_name, time_and_room in lesson.items():
+                        start_time = time_and_room[0]
+                        end_time = time_and_room[1]
+                        total_minutes = time_and_room[2]
+                        room = time_and_room[3]
+                        
+                        flattened_data.append({
+                            'lektion': lesson_name,
+                            'tid': [start_time, end_time, total_minutes],
+                            'dag': day,
+                            'rum': room
+                        })
         df = pd.DataFrame(flattened_data)
         df.to_csv(output_filename, index=False)
         return df
@@ -190,11 +212,13 @@ class Schedule:
             lesson_name = row['lektion']
             time_info_str = row['tid']
             day = row['dag']
+            room = row['rum']
+            
             time_info = ast.literal_eval(time_info_str)
             if len(time_info) == 3:
                 start_time = datetime.strptime(time_info[0], '%H:%M')
                 end_time = time_info[1]
-                schedule[day].append((start_time, end_time, lesson_name))
+                schedule[day].append((start_time, end_time, lesson_name, room))
             else:
                 print(f"Unexpected time format in line: {row}")
         max_rows = 0
@@ -203,9 +227,14 @@ class Schedule:
             max_rows = max(max_rows, len(lessons))
         df_schedule = pd.DataFrame(index=range(max_rows), columns=days)
         for day in days:
-            for i, (start_time, end_time, lesson_name) in enumerate(schedule[day]):
+            for i, (start_time, end_time, lesson_name, room) in enumerate(schedule[day]):
                 start_time_str = start_time.strftime('%H:%M')
-                df_schedule.at[i, day] = f"{lesson_name} ({start_time_str}-{end_time})"
+                # Handle missing room information
+                if pd.isna(room) or room == '':
+                    room_str = ''
+                else:
+                    room_str = f",{room}"
+                df_schedule.at[i, day] = f"{lesson_name} ({start_time_str}-{end_time}{room_str})"
         output_folder = "combined_schedule"
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
@@ -215,64 +244,111 @@ class Schedule:
     def create_class_schedule_from_combined_schedule(self, df):
         schedule = {}
         pupil_lessons_df = pd.read_csv("pupils_lessons.csv", encoding="utf-8")
+        # Adjusted regular expression to handle optional room
+        lesson_pattern = r'^(.*?) \(([^-]+)-([^\),]+)(?:,([^)]+))?\)$'
         for day in df.columns:
             day_schedule = []
             for lesson in df[day].dropna():
-                lesson_name, lesson_time = lesson.rsplit(' ', 1)
-                lesson_time = lesson_time.strip('()')
-                kurs_list = pupil_lessons_df[pupil_lessons_df['lektion'] == re.sub(r'\s+\(.*\)', '', lesson_name)]['kurs'].unique()
+                match = re.match(lesson_pattern, lesson)
+                if match:
+                    lesson_name = match.group(1).strip()
+                    start_time = match.group(2).strip()
+                    end_time = match.group(3).strip()
+                    room = match.group(4)  # May be None if room is missing
+                    if room:
+                        room = room.strip()
+                else:
+                    continue  # Skip if the lesson string doesn't match the expected format
+                # Get the list of courses (kurs) associated with the lesson
+                kurs_list = pupil_lessons_df[pupil_lessons_df['lektion'] == lesson_name]['kurs'].unique()
                 for kurs in kurs_list:
-                    class_dict = next((item for item in day_schedule if kurs in item), {kurs: []})
-                    class_dict[kurs].append({lesson_time: lesson_name})
-                    if class_dict not in day_schedule:
+                    # Find existing class_dict or create a new one
+                    class_dict = next((item for item in day_schedule if kurs in item), None)
+                    if class_dict is None:
+                        class_dict = {kurs: []}
                         day_schedule.append(class_dict)
+                    # Build lesson info
+                    lesson_info = {
+                        'start_time': start_time,
+                        'end_time': end_time,
+                        'lesson_name': lesson_name,
+                    }
+                    if room:
+                        lesson_info['room'] = room
+                    class_dict[kurs].append(lesson_info)
             if day_schedule:
                 schedule[day] = day_schedule
         return schedule
+
+
     
     def create_csv_for_each_class(self, schedule):
         class_data = {}
         days_of_week = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag"]
-        def convert_time_range_to_minutes(time_range):
-            start_time, end_time = time_range.split('-')
-            start_hour, start_minute = map(int, start_time.split(':'))
-            end_hour, end_minute = map(int, end_time.split(':'))
-            start_total_minutes = start_hour * 60 + start_minute
-            end_total_minutes = end_hour * 60 + end_minute
-            return start_total_minutes, end_total_minutes
-        for day, classes in schedule.items():
-            for class_dict in classes:
-                for kurs, lessons in class_dict.items():
-                    if kurs not in class_data:
-                        class_data[kurs] = {day: [] for day in days_of_week}
-                    end_times = []
-                    for lesson in lessons:
-                        for time, subject in lesson.items():
-                            start_time, end_time = convert_time_range_to_minutes(time)
-                            class_data[kurs][day].append(f"{time}: {subject}")
-                            end_times.append((start_time, end_time))
+
+        def convert_time_to_minutes(time_str):
+            hour, minute = map(int, time_str.split(':'))
+            return hour * 60 + minute
+
+        for day in days_of_week:
+            if day in schedule:
+                classes = schedule[day]
+                for class_dict in classes:
+                    for kurs, lessons in class_dict.items():
+                        if kurs not in class_data:
+                            class_data[kurs] = {d: [] for d in days_of_week}
+                        for lesson in lessons:
+                            start_time = lesson['start_time']
+                            end_time = lesson['end_time']
+                            lesson_name = lesson['lesson_name']
+                            room = lesson.get('room', None)
+                            time_range = f"{start_time}-{end_time}"
+                            # Format the lesson string including room if available
+                            if room:
+                                lesson_str = f"{time_range}: {lesson_name} ({room})"
+                            else:
+                                lesson_str = f"{time_range}: {lesson_name}"
+                            class_data[kurs][day].append({
+                                'start_minutes': convert_time_to_minutes(start_time),
+                                'lesson_str': lesson_str
+                            })
+
+        # Sort lessons by start time for each day and class
+        for kurs, days in class_data.items():
+            for day in days_of_week:
+                days[day] = sorted(days[day], key=lambda x: x['start_minutes'])
+                # Replace the list of dicts with list of lesson strings
+                days[day] = [item['lesson_str'] for item in days[day]]
+
+        # Write CSV files for each class
         for kurs, data in class_data.items():
             max_lessons = max(len(lessons) for lessons in data.values())
-            df = pd.DataFrame({day: data[day] + [''] * (max_lessons - len(data[day])) for day in days_of_week})
+            df = pd.DataFrame({
+                day: data[day] + [''] * (max_lessons - len(data[day]))
+                for day in days_of_week
+            })
             df.fillna('', inplace=True)
             output_folder = "class_schedules"
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
-            df.to_csv(os.path.join(output_folder, f"{kurs}.csv"), index=False, encoding="utf-8-sig")
+            df.to_csv(
+                os.path.join(output_folder, f"{kurs}.csv"),
+                index=False,
+                encoding="utf-8-sig"
+            )
             print(f"Class schedule saved for: {kurs}")
-            
-    def run(self):
-        self.classes = self.get_classes()
-        self.data, self.schema = self.get_pupils_ssn()
-        self.all_lessons = self.get_all_lessons()
-        self.names = self.get_pupil_names()
-        self.df = self.convert_to_csv("pupils_lessons.csv")
-        self.lessons = self.format_days_to_lessons("P1")
-        self.convert_time_lessons_to_csv("lessons.csv")
-        self.df = self.create_combined_schedule()
-        self.schedule = self.create_class_schedule_from_combined_schedule(self.df)
-        self.create_csv_for_each_class(self.schedule)
+
+
 
 if __name__ == "__main__":
     schedule = Schedule("schema.txt", ["TE", "EE", "ES"])
-    schedule.run()
+    schedule.classes = schedule.get_classes()
+    schedule.data, schedule.schema = schedule.get_pupils_ssn()
+    schedule.all_lessons = schedule.get_all_lessons()
+    schedule.names = schedule.get_pupil_names()
+    schedule.df = schedule.convert_to_csv("pupils_lessons.csv")
+    schedule.lessons = schedule.format_days_to_lessons("P1")
+    schedule.convert_time_lessons_to_csv("lessons.csv")
+    schedule.df = schedule.create_combined_schedule()
+    schedule.schedule = schedule.create_class_schedule_from_combined_schedule(schedule.df)
+    schedule.create_csv_for_each_class(schedule.schedule)
